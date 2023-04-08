@@ -1,5 +1,5 @@
 <?php
-// Database credentials
+// Database Credentials
 $host = "localhost";
 $username = "root";
 $password = "";
@@ -8,25 +8,30 @@ $dbname = "kiutsoapp";
 // Connect to database
 $conn = mysqli_connect($host, $username, $password, $dbname);
 
-// Retrieve username and lastname from form submitted via POST
-$EncodedData = file_get_contents('php://input');
-$DecodedData = json_decode($EncodedData,true);
-$username =  $DecodedData['username'];
-$lastname =  $DecodedData['lastname'];
-
-// Prepare and execute statement
-$sql = "INSERT INTO users (username, lastname) VALUES ('$username', '$lastname')";
-$R=mysqli_query($conn, $sql);
-if ($R) {
-  $message = "Data added successfully.";
-} else {
-  $message = "Error: " . mysqli_error($conn);
+// check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
-// Close connection
-mysqli_close($conn);
+// query to retrieve all user Credentials
+$sql = "SELECT * FROM signups";
 
-// Output message
-$response[]=array("message"=>$message);
-echo json_encode($response);
+$result = $conn->query($sql);
+
+// array to store user Credentials
+$Credentials = [];
+
+if ($result->num_rows > 0) {
+    // loop through all rows and add to Credentials array
+    while($row = $result->fetch_assoc()) {
+        $Credentials[] = $row;
+    }
+} 
+
+$conn->close();
+
+// return Credentials array as JSON response
+header('Content-Type: application/json');
+echo json_encode($Credentials);
+
 ?>
