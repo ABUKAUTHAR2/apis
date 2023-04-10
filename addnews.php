@@ -30,7 +30,7 @@ if ($R) {
   $message = "Error: " . mysqli_error($conn);
 }
 
-// Close connection
+// Close connectionqqqqqqqqqqqqq
 mysqli_close($conn);
 
 // Output message
