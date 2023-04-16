@@ -1,53 +1,55 @@
 <?php
-// Database Credentials
-$host = "localhost";
+
+// Set database connection variables
+$servername = "localhost";
 $username = "root";
 $password = "";
 $dbname = "kiutsoapp";
 
-// Connect to database
-$conn = mysqli_connect($host, $username, $password, $dbname);
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
 
-// check connection
+// Check connection
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+  die("Connection failed: " . $conn->connect_error);
 }
 
-// query to retrieve all news
-$sql = "SELECT * FROM news";
+// Check if the request method is POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  // Retrieve the news item ID and new likes count from the request body
+  $id = $_POST['id'];
+  $likes = $_POST['likes'];
 
-$result = $conn->query($sql);
+  // Update the likes count in the 'news' table
+  $sql = "UPDATE news SET likes = $likes WHERE id = $id";
+  if ($conn->query($sql) === FALSE) {
+    echo "Error updating record: " . $conn->error;
+    exit;
+  }
 
-// array to store news
-$news = [];
+  // Output a success message
+  echo "Likes count updated successfully!";
+} else {
+  // Retrieve all data from 'news' table
+  $sql = "SELECT * FROM news";
+  $result = $conn->query($sql);
 
-if ($result->num_rows > 0) {
-    // loop through all rows and add to news array
+  // Create an empty array to store the retrieved data
+  $data = array();
+
+  // Check if any data was retrieved
+  if ($result->num_rows > 0) {
+    // Loop through each row of data and store it in the array
     while($row = $result->fetch_assoc()) {
-        // encode image data as base64 string
-        $imageData = base64_encode($row['image']);
-
-        // create new array with image data as base64 string
-        $newsItem = [
-            'id' => $row['id'],
-            'image' => $imageData,
-            'context' => $row['context'],
-            'summary' => $row['summary'],
-            'description' => $row['description'],
-            'date' => $row['date'],
-            'time' => $row['time'],
-            'likes' => $row['likes'],
-            'important' => $row['important']
-        ];
-
-        // add news item to news array
-        $news[] = $newsItem;
+      $data[] = $row;
     }
-} 
+  }
 
+  // Convert the array to a JSON object and output it
+  echo json_encode($data);
+}
+
+// Close the database connection
 $conn->close();
 
-// return news array as JSON response
-header('Content-Type: application/json');
-echo json_encode($news);
 ?>
