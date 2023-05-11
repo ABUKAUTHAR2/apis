@@ -34,7 +34,7 @@ if(isset($_POST["submit"])) {
 }
 
 // Check file size
-if ($_FILES["image"]["size"] > 500000) {
+if ($_FILES["image"]["size"] > 90000000) {
   echo "Sorry, your file is too large.";
   exit;
 }
